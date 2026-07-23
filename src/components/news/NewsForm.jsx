@@ -18,6 +18,11 @@ const schema = z.object({
   categoryId: z.string().min(1, 'validation.required'),
   status: z.enum(['DRAFT', 'PUBLISHED']),
   rank: z.coerce.number().int().min(0).max(10),
+  slug: z.string().optional(),
+  customUrl: z.string().optional(),
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
+  metaKeywords: z.string().optional(),
 });
 
 const NewsForm = ({ defaultValues, categories, onSubmit: onSubmitProp, loading, newsId }) => {
@@ -41,6 +46,11 @@ const NewsForm = ({ defaultValues, categories, onSubmit: onSubmitProp, loading, 
       categoryId: String(defaultValues?.category?.id || defaultValues?.categoryId || ''),
       status: defaultValues?.status || 'DRAFT',
       rank: defaultValues?.rank ?? 0,
+      slug: defaultValues?.slug || '',
+      customUrl: defaultValues?.customUrl || '',
+      metaTitle: defaultValues?.metaTitle || '',
+      metaDescription: defaultValues?.metaDescription || '',
+      metaKeywords: defaultValues?.metaKeywords || '',
     },
   });
 
@@ -102,6 +112,47 @@ const NewsForm = ({ defaultValues, categories, onSubmit: onSubmitProp, loading, 
               />
             )}
           />
+
+          {/* ── SEO & Custom URL Settings Section ── */}
+          <div className="p-5 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-800 space-y-4">
+            <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-primary-600"></span>
+              Dynamic URL & SEO Optimization (Search Engine & GEO Settings)
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input
+                label="Custom News URL Slug (Permalink)"
+                placeholder="e.g. customized-news-headline-url"
+                {...register('slug')}
+              />
+
+              <Input
+                label="Dynamic External Source / Custom URL Link"
+                placeholder="https://example.com/custom-news-link"
+                {...register('customUrl')}
+              />
+            </div>
+
+            <Input
+              label="SEO Meta Title"
+              placeholder="Catchy search engine title (defaults to News Title)"
+              {...register('metaTitle')}
+            />
+
+            <Textarea
+              label="SEO Meta Description"
+              placeholder="High CTR search summary description"
+              rows={2}
+              {...register('metaDescription')}
+            />
+
+            <Input
+              label="SEO Meta Keywords"
+              placeholder="e.g. breaking news, india, politics, election 2026"
+              {...register('metaKeywords')}
+            />
+          </div>
         </div>
 
         {/* Sidebar — right 1 col */}

@@ -8,10 +8,8 @@ import {
   Save,
   Plus,
   Trash2,
-  CheckCircle2,
   Tv,
-  Globe,
-  TrendingUp
+  Globe
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -43,7 +41,7 @@ export default function SectionManager() {
   });
 
   // Regional News States
-  const [regionalStates, setRegionalStates] = useState([
+  const [regionalStates] = useState([
     { id: 'up', name: 'उत्तर प्रदेश (UP)', active: true, newsCount: 18 },
     { id: 'bihar', name: 'बिहार (Bihar)', active: true, newsCount: 14 },
     { id: 'delhi', name: 'दिल्ली NCR', active: true, newsCount: 22 },

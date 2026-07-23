@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Eye, EyeOff, LayoutGrid, AlertCircle, CheckCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, LayoutGrid, AlertCircle, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
 
@@ -30,7 +30,7 @@ const AdsManager = () => {
   const fetchAds = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/ads');
+      const res = await api.get('/ads/all');
       const data = res.data?.data || res.data || [];
       setAds(data);
     } catch (err) {

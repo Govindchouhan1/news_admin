@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Globe, Mail, Phone, MapPin, Link as LinkIcon } from 'lucide-react';
+import { Save, Globe, Mail, Link as LinkIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
