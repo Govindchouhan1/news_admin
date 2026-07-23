@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Radio,
   Sparkles,
@@ -49,6 +49,19 @@ export default function SectionManager() {
     { id: 'rajasthan', name: 'राजस्थान', active: true, newsCount: 12 }
   ]);
 
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('app_section_settings');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.liveBar) setLiveBar(parsed.liveBar);
+        if (parsed.astrology) setAstrology(parsed.astrology);
+      }
+    } catch (err) {
+      console.error("Error loading section settings:", err);
+    }
+  }, []);
+
   const handleAddTicker = () => {
     if (!newTickerItem.trim()) return;
     setLiveBar((prev) => ({
@@ -68,7 +81,13 @@ export default function SectionManager() {
   };
 
   const handleSaveSettings = () => {
-    toast.success('सभी सेक्शन अपडेट्स सफलतापूर्वक सुरक्षित किए गए!');
+    try {
+      const settings = { liveBar, astrology, regionalStates };
+      localStorage.setItem('app_section_settings', JSON.stringify(settings));
+      toast.success('सभी सेक्शन अपडेट्स सफलतापूर्वक सुरक्षित किए गए!');
+    } catch (err) {
+      toast.error('सेटिंग्स सुरक्षित करने में त्रुटि हुई');
+    }
   };
 
   return (
