@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Eye, EyeOff, LayoutGrid, AlertCircle, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '../services/api';
+import api from '../api/axios';
 
 const PLACEMENTS = [
   { id: 'TOP_LEADERBOARD', label: 'Top Leaderboard Header Banner (728x90)' },

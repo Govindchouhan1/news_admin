@@ -17,7 +17,8 @@ const Hashtags   = lazy(() => import('./pages/Hashtags'));
 const Comments   = lazy(() => import('./pages/Comments'));
 const Users      = lazy(() => import('./pages/Users'));
 const Settings   = lazy(() => import('./pages/Settings'));
-const AdsManager = lazy(() => import('./pages/AdsManager'));
+const AdsManager     = lazy(() => import('./pages/AdsManager'));
+const SectionManager = lazy(() => import('./pages/SectionManager'));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center h-64">
@@ -47,6 +48,7 @@ function App() {
               <Route path="/comments"        element={<Comments />} />
               <Route path="/users"           element={<Users />} />
               <Route path="/ads"             element={<AdsManager />} />
+              <Route path="/sections"        element={<SectionManager />} />
               <Route path="/settings"       element={<Settings />} />
             </Route>
           </Route>

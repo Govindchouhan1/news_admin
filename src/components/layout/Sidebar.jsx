@@ -11,6 +11,7 @@ import {
   Users,
   Settings2,
   Zap,
+  Layers,
 } from 'lucide-react';
 import useUiStore from '../../store/uiStore';
 
@@ -23,6 +24,7 @@ const Sidebar = () => {
     { to: '/analytics', icon: BarChart3, label: 'nav.analytics' },
     { to: '/news', icon: Newspaper, label: 'nav.news' },
     { to: '/categories', icon: Tag, label: 'nav.categories' },
+    { to: '/sections', icon: Layers, label: 'सेक्शन & लाइव प्रबंधक' },
     { to: '/hashtags', icon: Hash, label: 'nav.hashtags' },
     { to: '/comments', icon: MessageSquare, label: 'nav.comments' },
     { to: '/users', icon: Users, label: 'nav.users' },
@@ -60,11 +62,13 @@ const Sidebar = () => {
             className={({ isActive }) =>
               `sidebar-link ${isActive ? 'active' : ''}`
             }
-            title={!sidebarOpen ? t(label) : undefined}
+            title={!sidebarOpen ? (label.startsWith('nav.') ? t(label) : label) : undefined}
           >
             <Icon className="w-5 h-5 shrink-0" />
             {sidebarOpen && (
-              <span className="truncate animate-fade-in">{t(label)}</span>
+              <span className="truncate animate-fade-in">
+                {label.startsWith('nav.') ? t(label) : label}
+              </span>
             )}
           </NavLink>
         ))}
