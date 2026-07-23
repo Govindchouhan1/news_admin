@@ -1,0 +1,109 @@
+{
+  "common": {
+    "save": "Save", "cancel": "Cancel", "delete": "Delete",
+    "edit": "Edit", "create": "Create", "search": "Search",
+    "filter": "Filter", "reset": "Reset", "loading": "Loading...",
+    "noData": "No data found", "confirm": "Confirm",
+    "yes": "Yes", "no": "No", "back": "Back",
+    "actions": "Actions", "status": "Status", "createdAt": "Created",
+    "updatedAt": "Updated", "total": "Total", "page": "Page",
+    "of": "of", "rows": "rows", "view": "View",
+    "upload": "Upload", "submit": "Submit", "close": "Close",
+    "all": "All", "active": "Active", "inactive": "Inactive",
+    "required": "Required", "optional": "Optional",
+    "custom": "Date range", "from": "From", "to": "To"
+  },
+  "auth": {
+    "login": "Login", "logout": "Logout", "email": "Email",
+    "password": "Password", "loginTitle": "Login to Admin Panel",
+    "loginSubtitle": "Sign in to your account", "loginButton": "Login",
+    "loggingIn": "Logging in...", "emailPlaceholder": "email@example.com",
+    "passwordPlaceholder": "Enter password",
+    "loginError": "Email or password is incorrect",
+    "sessionExpired": "Session expired, please login again"
+  },
+  "nav": {
+    "dashboard": "Dashboard", "analytics": "Analytics",
+    "news": "News", "categories": "Categories",
+    "hashtags": "Hashtags", "comments": "Comments",     "users": "Users",     "settings": "Settings"
+  },
+  "news": {
+    "title": "News", "createNews": "Create News", "editNews": "Edit News",
+    "newsTitle": "Title", "shortDescription": "Short Description",
+    "content": "Content", "category": "Category", "hashtags": "Hashtags",
+    "rank": "Rank", "status": "Status", "images": "Images",
+    "author": "Author", "views": "Views", "likes": "Likes",
+    "comments": "Comments", "draft": "Draft", "published": "Published",
+    "deleted": "Deleted", "deleteConfirm": "Are you sure you want to delete this news?",
+    "deleteSuccess": "News deleted", "createSuccess": "News created",
+    "updateSuccess": "News updated",
+    "searchPlaceholder": "Search by title or content...",
+    "selectCategory": "Select category", "selectHashtag": "Select hashtag",
+    "selectStatus": "Select status", "selectSort": "Sort",
+    "titlePlaceholder": "Enter news title",
+    "shortDescPlaceholder": "Enter short description (10-500 chars)",
+    "contentPlaceholder": "Enter news content...",
+    "rankTooltip": "Editorial importance rank (0-10)",
+    "uploadImages": "Upload images",
+    "imagesUploaded": "{{count}} images uploaded",
+    "uploadHint": "JPG, PNG, WEBP, GIF (max 5MB)",
+    "noImages": "No images", "today": "Today",
+    "thisWeek": "This week", "thisMonth": "This month",
+    "idDesc": "Newest", "idAsc": "Oldest",
+    "mostViewed": "Most viewed", "mostLiked": "Most liked",
+    "mostCommented": "Most commented", "rankDesc": "Highest rank",
+    "addHashtag": "Add hashtag",
+    "hashtagHint": "Press Enter to add (max 10)", "filterTime": "Time"
+  },
+  "categories": {
+    "title": "Categories", "createCategory": "Create Category",
+    "editCategory": "Edit Category", "name": "Name", "slug": "Slug",
+    "namePlaceholder": "Enter category name",
+    "deleteConfirm": "Are you sure you want to delete this category?",
+    "deleteSuccess": "Category deleted", "createSuccess": "Category created",
+    "updateSuccess": "Category updated"
+  },
+  "hashtags": {
+    "title": "Hashtags", "createHashtag": "Create Hashtag",
+    "name": "Name", "slug": "Slug", "namePlaceholder": "Enter hashtag name",
+    "deleteConfirm": "Are you sure you want to delete this hashtag?",
+    "deleteSuccess": "Hashtag deleted", "createSuccess": "Hashtag created"
+  },
+  "comments": {
+    "title": "Comments", "content": "Content", "author": "Author",
+    "newsTitle": "News", "deleteConfirm": "Are you sure you want to delete this comment?",
+    "deleteSuccess": "Comment deleted", "selectNews": "Select news"
+  },
+  "users": {
+    "title": "Users", "username": "Username", "email": "Email",
+    "role": "Role", "name": "Name", "surname": "Surname",
+    "blocked": "Blocked", "active": "Active", "block": "Block",
+    "unblock": "Unblock", "blockConfirm": "Are you sure you want to block this user?",
+    "unblockConfirm": "Are you sure you want to unblock?"
+  },
+  "dashboard": {
+    "title": "Dashboard", "totalNews": "Total news",
+    "publishedNews": "Published", "draftNews": "Drafts",
+    "totalComments": "Total comments", "totalViews": "Total views",
+    "totalLikes": "Total likes", "recentNews": "Recent news",
+    "topViewed": "Most viewed"
+  },
+  "analytics": {
+    "title": "Analytics", "newsOverview": "News statistics",
+    "topNews": "Top news", "byCategory": "By category",
+    "viewsChart": "Views chart"
+  },
+  "validation": {
+    "required": "This field is required",
+    "minLength": "Must be at least {{min}} characters",
+    "maxLength": "Must be at most {{max}} characters",
+    "email": "Please enter a valid email",
+    "min": "Value must be at least {{min}}",
+    "max": "Value must be at most {{max}}"
+  },
+  "error": {
+    "general": "An error occurred", "network": "Network error",
+    "unauthorized": "Please login", "forbidden": "Permission denied",
+    "notFound": "Not found", "serverError": "Server error"
+  }
+}

@@ -1,0 +1,135 @@
+1-TASK
+You are a senior frontend engineer. Build a production-ready Admin Panel using React, Tailwind CSS, and TipTap editor.
+
+Project: News Admin Panel
+
+Design:
+- Modern + Material UI style
+- Primary color: RED
+- Clean, minimal, professional UI
+- Smooth transitions and hover effects
+
+Tech Stack:
+- React
+- Tailwind CSS
+- State management: Zustand or Redux Toolkit
+- API: Axios with interceptors
+- Forms: React Hook Form + Zod validation
+- Rich text editor: TipTap
+- Icons: Lucide React
+- Date formatting: dayjs
+- i18n: react-i18next
+
+Language Support:
+- uzb-latin
+- uzb-cyrillic
+- Language switcher in navbar (globe icon)
+
+Theme:
+- Light/Dark mode toggle (moon/sun icon)
+- Persist theme in localStorage
+
+Date Format:
+- 21:12 / 03.04.2026 (custom formatter)
+
+Authentication:
+- Login page (email + password)
+- Store accessToken in memory
+- Store refreshToken securely
+- Implement Axios interceptor with auto refresh token
+- Redirect unauthorized users to login
+
+Use this API documentation as reference:
+:contentReference[oaicite:0]{index=0}
+
+App Structure:
+
+Pages:
+1. Login
+2. Dashboard
+3. Analytics
+4. News
+5. Categories
+6. Hashtags
+7. Comments
+8. Users
+
+Layout:
+- Sidebar (left)
+- Top navbar
+  - Language switch (globe icon)
+  - Theme toggle (moon/sun)
+  - User profile dropdown
+
+News Module:
+- Create/Edit news using TipTap editor
+- Fields:
+  - title
+  - shortDescription
+  - content (TipTap)
+  - category
+  - hashtags
+  - rank (0–10)
+  - status (DRAFT/PUBLISHED)
+- Image upload support
+
+News List:
+- Table view with pagination
+- Filters:
+  - time (today, this_week, this_month)
+  - category
+  - hashtag
+  - rank
+- Sorting:
+  - id_desc / id_asc
+  - most_viewed
+  - most_liked
+  - most_commented
+  - rank_desc
+- Search input (title + content)
+
+API Integration:
+- GET /news with query params
+- POST /news
+- PUT /news/:id
+- DELETE /news/:id
+
+Categories:
+- CRUD using /categories
+
+Hashtags:
+- CRUD using /hashtags
+
+Comments:
+- View comments by news
+- Delete comment
+
+Users:
+- List users
+- Block/unblock (if API available)
+
+UX Requirements:
+- Loading skeletons
+- Toast notifications
+- Error handling UI
+- Confirmation modals (delete actions)
+- Responsive design
+
+Code Quality:
+- Use reusable components
+- Create hooks for API calls
+- Separate services layer
+- Follow clean architecture
+
+Output:
+- Full folder structure
+- All pages and components
+- TipTap editor integration
+- API service layer
+- i18n setup (uz-latin + uz-cyrillic)
+- Dark mode implementation
+- Example components (table, form, modal)
+
+Extra 
+TipTap real integration
+news filter hook
