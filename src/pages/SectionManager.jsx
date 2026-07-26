@@ -37,6 +37,14 @@ export default function SectionManager() {
       taurus: 'वृषभ राशि: व्यावसायिक यात्रा के योग बन रहे हैं। परिवार में खुशहाली रहेगी।',
       gemini: 'मिथुन राशि: कार्यक्षेत्र में सहकर्मियों का सहयोग मिलेगा। स्वास्थ्य का ध्यान रखें।',
       cancer: 'कर्क राशि: व्यापार में सकारात्मक बदलाव देखने को मिलेंगे। धन लाभ के अवसर प्राप्त होंगे।',
+      leo: 'सिंह राशि: समाज में मान-सम्मान बढ़ेगा। रुका हुआ धन वापस मिलने की संभावना है।',
+      virgo: 'कन्या राशि: नए कार्य की शुरुआत के लिए अनुकूल समय। करियर में तरक्की होगी।',
+      libra: 'तुला राशि: पारिवारिक जीवन में सुख-शांति बनी रहेगी। निवेश से लाभ होगा।',
+      scorpio: 'वृश्चिक राशि: स्वास्थ्य में सुधार होगा। पुरानी समस्याओं का समाधान मिलेगा।',
+      sagittarius: 'धनु राशि: धार्मिक कार्यों में रुचि बढ़ेगी। यात्रा के योग बन रहे हैं।',
+      capricorn: 'मकर राशि: व्यापार में वृद्धि होगी। मित्रों का सहयोग प्राप्त होगा।',
+      aquarius: 'कुंभ राशि: अचानक धन लाभ हो सकता है। नए संबंध स्थापित होंगे।',
+      pisces: 'मीन राशि: मानसिक शांति मिलेगी। शिक्षा और प्रतियोगिता में सफलता प्राप्त होगी।'
     }
   });
 
@@ -256,22 +264,40 @@ export default function SectionManager() {
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {Object.entries(astrology.zodiacs).map(([key, val]) => (
-                <div key={key} className="space-y-1">
-                  <label className="text-xs font-bold text-gray-800 dark:text-gray-200 capitalize">{key}</label>
-                  <textarea
-                    rows={2}
-                    value={val}
-                    onChange={(e) =>
-                      setAstrology({
-                        ...astrology,
-                        zodiacs: { ...astrology.zodiacs, [key]: e.target.value }
-                      })
-                    }
-                    className="w-full p-2.5 text-xs bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white"
-                  />
-                </div>
-              ))}
+              {Object.entries(astrology.zodiacs).map(([key, val]) => {
+                const ZODIAC_LABELS = {
+                  aries: 'मेष (Aries)',
+                  taurus: 'वृषभ (Taurus)',
+                  gemini: 'मिथुन (Gemini)',
+                  cancer: 'कर्क (Cancer)',
+                  leo: 'सिंह (Leo)',
+                  virgo: 'कन्या (Virgo)',
+                  libra: 'तुला (Libra)',
+                  scorpio: 'वृश्चिक (Scorpio)',
+                  sagittarius: 'धनु (Sagittarius)',
+                  capricorn: 'मकर (Capricorn)',
+                  aquarius: 'कुंभ (Aquarius)',
+                  pisces: 'मीन (Pisces)'
+                };
+                return (
+                  <div key={key} className="space-y-1">
+                    <label className="text-xs font-bold text-gray-800 dark:text-gray-200 capitalize">
+                      {ZODIAC_LABELS[key] || key}
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={val}
+                      onChange={(e) =>
+                        setAstrology({
+                          ...astrology,
+                          zodiacs: { ...astrology.zodiacs, [key]: e.target.value }
+                        })
+                      }
+                      className="w-full p-2.5 text-xs bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white"
+                    />
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
