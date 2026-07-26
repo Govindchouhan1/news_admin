@@ -7,6 +7,7 @@ import NewsForm from '../../components/news/NewsForm';
 import newsService from '../../services/newsService';
 import useCategories from '../../hooks/useCategories';
 import usePermission from '../../hooks/usePermission';
+import useAuthStore from '../../store/authStore';
 import { extractError } from '../../utils/helpers';
 import { FormSkeleton } from '../../components/ui/Skeleton';
 
@@ -15,7 +16,11 @@ const NewsEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { canWrite } = usePermission();
+  const { user } = useAuthStore();
   const { categories } = useCategories();
+  const assignedCategoryIds = user?.role === 'REPORTER' && user?.assignedCategories
+    ? (() => { try { return JSON.parse(user.assignedCategories); } catch { return []; } })()
+    : null;
   const [newsItem, setNewsItem] = useState(null);
   const [fetching, setFetching] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -79,6 +84,7 @@ const NewsEdit = () => {
             onSubmit={handleSubmit}
             loading={saving}
             newsId={id}
+            assignedCategoryIds={assignedCategoryIds}
           />
         ) : null}
       </div>

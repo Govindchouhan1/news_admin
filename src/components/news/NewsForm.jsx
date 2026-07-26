@@ -25,7 +25,7 @@ const schema = z.object({
   metaKeywords: z.string().optional(),
 });
 
-const NewsForm = ({ defaultValues, categories, onSubmit: onSubmitProp, loading, newsId }) => {
+const NewsForm = ({ defaultValues, categories, onSubmit: onSubmitProp, loading, newsId, assignedCategoryIds }) => {
   const { t } = useTranslation();
 
   const [hashtags, setHashtags] = useState(
@@ -58,7 +58,10 @@ const NewsForm = ({ defaultValues, categories, onSubmit: onSubmitProp, loading, 
     onSubmitProp({ ...data, hashtags });
   };
 
-  const categoryOptions = categories.map((c) => ({ value: String(c.id), label: c.name }));
+  const filteredCategories = assignedCategoryIds
+    ? categories.filter((c) => assignedCategoryIds.includes(c.id))
+    : categories;
+  const categoryOptions = filteredCategories.map((c) => ({ value: String(c.id), label: c.name }));
 
   const statusOptions = [
     { value: 'DRAFT', label: t('news.draft') },

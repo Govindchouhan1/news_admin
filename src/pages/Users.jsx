@@ -10,6 +10,7 @@ import Badge from '../components/ui/Badge';
 import useUiStore from '../store/uiStore';
 import useAuthStore from '../store/authStore';
 import userService from '../services/userService';
+import categoryService from '../services/categoryService';
 import { extractError } from '../utils/helpers';
 import { formatDate } from '../utils/dateFormatter';
 
@@ -73,12 +74,13 @@ const Users = () => {
   const [editingUser, setEditingUser] = useState(null);
   const [saving, setSaving] = useState(false);
   const [pushingId, setPushingId] = useState(null);
+  const [categories, setCategories] = useState([]);
   const [createForm, setCreateForm] = useState({
     username: '', email: '', password: '', name: '', surname: '',
-    role: 'REPORTER', dbUrl: '', clientDomain: '',
+    role: 'REPORTER', dbUrl: '', clientDomain: '', assignedCategories: [],
   });
   const [editForm, setEditForm] = useState({
-    name: '', surname: '', dbUrl: '', clientDomain: '',
+    name: '', surname: '', dbUrl: '', clientDomain: '', assignedCategories: [],
   });
 
   const fetchUsers = async () => {
@@ -94,7 +96,14 @@ const Users = () => {
     }
   };
 
-  useEffect(() => { fetchUsers(); }, []);
+  const fetchCategories = async () => {
+    try {
+      const res = await categoryService.getAll();
+      setCategories(res.data.data || []);
+    } catch {}
+  };
+
+  useEffect(() => { fetchUsers(); fetchCategories(); }, []);
 
   const patchUser = (userId, fields) => {
     setUsers((prev) =>
@@ -103,7 +112,7 @@ const Users = () => {
   };
 
   const openCreate = () => {
-    setCreateForm({ username: '', email: '', password: '', name: '', surname: '', role: 'REPORTER', dbUrl: '', clientDomain: '' });
+    setCreateForm({ username: '', email: '', password: '', name: '', surname: '', role: 'REPORTER', dbUrl: '', clientDomain: '', assignedCategories: [] });
     setCreateOpen(true);
   };
 
@@ -114,6 +123,9 @@ const Users = () => {
       if (payload.role === 'REPORTER') {
         delete payload.dbUrl;
         delete payload.clientDomain;
+        if (!payload.assignedCategories?.length) delete payload.assignedCategories;
+      } else {
+        delete payload.assignedCategories;
       }
       await userService.create(payload);
       toast.success('User created');
@@ -128,7 +140,8 @@ const Users = () => {
 
   const openEdit = (u) => {
     setEditingUser(u);
-    setEditForm({ name: u.name, surname: u.surname, dbUrl: '', clientDomain: '' });
+    const assigned = u.assignedCategories ? (() => { try { return JSON.parse(u.assignedCategories); } catch { return []; } })() : [];
+    setEditForm({ name: u.name, surname: u.surname, dbUrl: '', clientDomain: '', assignedCategories: assigned });
     setEditOpen(true);
   };
 
@@ -141,6 +154,9 @@ const Users = () => {
       if (editingUser.role === 'ADMIN') {
         if (editForm.dbUrl) payload.dbUrl = editForm.dbUrl;
         if (editForm.clientDomain) payload.clientDomain = editForm.clientDomain;
+      }
+      if (editingUser.role === 'REPORTER' && editForm.assignedCategories) {
+        payload.assignedCategories = editForm.assignedCategories;
       }
       if (Object.keys(payload).length === 0) {
         toast.error('No changes to save');
@@ -242,6 +258,19 @@ const Users = () => {
         ),
     },
     {
+      key: 'assignedCategories',
+      header: 'Categories',
+      width: 180,
+      render: (val, row) => {
+        if (row.role !== 'REPORTER' || !val) return <span className="text-xs text-gray-400">—</span>;
+        try {
+          const ids = JSON.parse(val);
+          const names = ids.map((id) => categories.find((c) => c.id === id)?.name).filter(Boolean);
+          return <span className="text-xs text-gray-500 truncate block max-w-[160px]" title={names.join(', ')}>{names.join(', ')}</span>;
+        } catch { return <span className="text-xs text-gray-400">—</span>; }
+      },
+    },
+    {
       key: 'createdAt',
       header: t('common.createdAt'),
       width: 145,
@@ -329,6 +358,36 @@ const Users = () => {
             </select>
           </div>
 
+          {createForm.role === 'REPORTER' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Assigned Categories
+              </label>
+              <div className="max-h-40 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg p-2 space-y-1">
+                {categories.map((cat) => (
+                  <label key={cat.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 px-2 py-1 rounded">
+                    <input
+                      type="checkbox"
+                      checked={createForm.assignedCategories.includes(cat.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setCreateForm({ ...createForm, assignedCategories: [...createForm.assignedCategories, cat.id] });
+                        } else {
+                          setCreateForm({ ...createForm, assignedCategories: createForm.assignedCategories.filter((id) => id !== cat.id) });
+                        }
+                      }}
+                      className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    />
+                    {cat.name}
+                  </label>
+                ))}
+                {categories.length === 0 && (
+                  <p className="text-xs text-gray-400 italic px-2">No categories available</p>
+                )}
+              </div>
+            </div>
+          )}
+
           {createForm.role === 'ADMIN' && (
             <>
               <Input label="Database URL" value={createForm.dbUrl} onChange={(e) => setCreateForm({ ...createForm, dbUrl: e.target.value })} placeholder="postgresql://..." />
@@ -348,6 +407,36 @@ const Users = () => {
         <div className="space-y-4">
           <Input label="Name" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
           <Input label="Surname" value={editForm.surname} onChange={(e) => setEditForm({ ...editForm, surname: e.target.value })} />
+
+          {editingUser?.role === 'REPORTER' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Assigned Categories
+              </label>
+              <div className="max-h-40 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg p-2 space-y-1">
+                {categories.map((cat) => (
+                  <label key={cat.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 px-2 py-1 rounded">
+                    <input
+                      type="checkbox"
+                      checked={editForm.assignedCategories.includes(cat.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setEditForm({ ...editForm, assignedCategories: [...editForm.assignedCategories, cat.id] });
+                        } else {
+                          setEditForm({ ...editForm, assignedCategories: editForm.assignedCategories.filter((id) => id !== cat.id) });
+                        }
+                      }}
+                      className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    />
+                    {cat.name}
+                  </label>
+                ))}
+                {categories.length === 0 && (
+                  <p className="text-xs text-gray-400 italic px-2">No categories available</p>
+                )}
+              </div>
+            </div>
+          )}
 
           {editingUser?.role === 'ADMIN' && (
             <>

@@ -9,12 +9,14 @@ import Button from '../../components/ui/Button';
 import newsService from '../../services/newsService';
 import useCategories from '../../hooks/useCategories';
 import usePermission from '../../hooks/usePermission';
+import useAuthStore from '../../store/authStore';
 import { extractError } from '../../utils/helpers';
 
 const NewsCreate = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { canWrite } = usePermission();
+  const { user } = useAuthStore();
 
   useEffect(() => {
     if (!canWrite) navigate('/news', { replace: true });
@@ -22,6 +24,9 @@ const NewsCreate = () => {
   const { categories } = useCategories();
   const [loading, setLoading] = useState(false);
   const [createdId, setCreatedId] = useState(null);
+  const assignedCategoryIds = user?.role === 'REPORTER' && user?.assignedCategories
+    ? (() => { try { return JSON.parse(user.assignedCategories); } catch { return []; } })()
+    : null;
 
   const handleSubmit = async (data) => {
     setLoading(true);
@@ -74,6 +79,7 @@ const NewsCreate = () => {
             onSubmit={handleSubmit}
             loading={loading}
             newsId={null}
+            assignedCategoryIds={assignedCategoryIds}
           />
         </div>
       )}
