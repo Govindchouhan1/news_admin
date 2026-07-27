@@ -13,14 +13,19 @@ import {
   Zap,
   Layers,
   Database,
+  Globe,
 } from 'lucide-react';
 import useUiStore from '../../store/uiStore';
+import useAuthStore from '../../store/authStore';
 
 const Sidebar = () => {
   const { t } = useTranslation();
   const { sidebarOpen } = useUiStore();
+  const user = useAuthStore((s) => s.user);
 
-  const NAV_ITEMS = [
+  const isBoss = user?.role?.toUpperCase() === 'BOSS';
+
+  const ALL_NAV_ITEMS = [
     { to: '/dashboard', icon: LayoutDashboard, label: 'nav.dashboard' },
     { to: '/analytics', icon: BarChart3, label: 'nav.analytics' },
     { to: '/news', icon: Newspaper, label: 'nav.news' },
@@ -29,10 +34,19 @@ const Sidebar = () => {
     { to: '/hashtags', icon: Hash, label: 'nav.hashtags' },
     { to: '/comments', icon: MessageSquare, label: 'nav.comments' },
     { to: '/users', icon: Users, label: 'nav.users' },
+    { to: '/websites', icon: Globe, label: 'Websites (वेबसाइट्स)' },
     { to: '/ads', icon: Zap, label: 'Ads Manager' },
     { to: '/db-manage', icon: Database, label: 'DB Manage' },
     { to: '/settings', icon: Settings2, label: 'nav.settings' },
   ];
+
+  const BOSS_NAV_ITEMS = [
+    { to: '/dashboard', icon: LayoutDashboard, label: 'nav.dashboard' },
+    { to: '/users', icon: Users, label: 'nav.users' },
+    { to: '/websites', icon: Globe, label: 'Websites (वेबसाइट्स)' },
+  ];
+
+  const NAV_ITEMS = isBoss ? BOSS_NAV_ITEMS : ALL_NAV_ITEMS;
 
   return (
     <aside

@@ -1,7 +1,6 @@
 import dayjs from 'dayjs';
-import 'dayjs/locale/uz';
+import 'dayjs/locale/hi';
 
-// Format: 21:12 / 03.04.2026
 export const formatDate = (date) => {
   if (!date) return '—';
   const d = dayjs(date);
@@ -23,11 +22,11 @@ export const formatRelative = (date) => {
   const d = dayjs(date);
   const now = dayjs();
   const diffMinutes = now.diff(d, 'minute');
-  if (diffMinutes < 1) return 'Hozir';
-  if (diffMinutes < 60) return `${diffMinutes} daqiqa oldin`;
+  if (diffMinutes < 1) return 'अभी';
+  if (diffMinutes < 60) return `${diffMinutes} मिनट पहले`;
   const diffHours = now.diff(d, 'hour');
-  if (diffHours < 24) return `${diffHours} soat oldin`;
+  if (diffHours < 24) return `${diffHours} घंटे पहले`;
   const diffDays = now.diff(d, 'day');
-  if (diffDays < 7) return `${diffDays} kun oldin`;
+  if (diffDays < 7) return `${diffDays} दिन पहले`;
   return formatDateShort(date);
 };

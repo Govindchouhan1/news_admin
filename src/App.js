@@ -5,6 +5,7 @@ import { Loader2 } from 'lucide-react';
 
 import ProtectedRoute from './routes/ProtectedRoute';
 import Layout from './components/layout/Layout';
+import useAuthStore from './store/authStore';
 
 const Login      = lazy(() => import('./pages/Login'));
 const Dashboard  = lazy(() => import('./pages/Dashboard'));
@@ -20,12 +21,22 @@ const Settings   = lazy(() => import('./pages/Settings'));
 const AdsManager     = lazy(() => import('./pages/AdsManager'));
 const SectionManager = lazy(() => import('./pages/SectionManager'));
 const DbManage       = lazy(() => import('./pages/DbManage'));
+const Websites       = lazy(() => import('./pages/Websites'));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center h-64">
     <Loader2 className="w-7 h-7 animate-spin text-primary-600" />
   </div>
 );
+
+// Restricted route for Non-Boss pages (If BOSS role tries to access, redirect to /dashboard)
+const NonBossRoute = ({ element }) => {
+  const user = useAuthStore((s) => s.user);
+  if (user?.role?.toUpperCase() === 'BOSS') {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return element;
+};
 
 function App() {
   return (
@@ -40,18 +51,21 @@ function App() {
             <Route element={<Layout />}>
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard"       element={<Dashboard />} />
-              <Route path="/analytics"       element={<Analytics />} />
-              <Route path="/news"            element={<NewsList />} />
-              <Route path="/news/create"     element={<NewsCreate />} />
-              <Route path="/news/:id/edit"   element={<NewsEdit />} />
-              <Route path="/categories"      element={<Categories />} />
-              <Route path="/hashtags"        element={<Hashtags />} />
-              <Route path="/comments"        element={<Comments />} />
               <Route path="/users"           element={<Users />} />
-              <Route path="/ads"             element={<AdsManager />} />
-              <Route path="/sections"        element={<SectionManager />} />
-              <Route path="/settings"       element={<Settings />} />
-              <Route path="/db-manage"      element={<DbManage />} />
+              <Route path="/websites"        element={<Websites />} />
+
+              {/* Pages restricted for BOSS role */}
+              <Route path="/analytics"       element={<NonBossRoute element={<Analytics />} />} />
+              <Route path="/news"            element={<NonBossRoute element={<NewsList />} />} />
+              <Route path="/news/create"     element={<NonBossRoute element={<NewsCreate />} />} />
+              <Route path="/news/:id/edit"   element={<NonBossRoute element={<NewsEdit />} />} />
+              <Route path="/categories"      element={<NonBossRoute element={<Categories />} />} />
+              <Route path="/hashtags"        element={<NonBossRoute element={<Hashtags />} />} />
+              <Route path="/comments"        element={<NonBossRoute element={<Comments />} />} />
+              <Route path="/ads"             element={<NonBossRoute element={<AdsManager />} />} />
+              <Route path="/sections"        element={<NonBossRoute element={<SectionManager />} />} />
+              <Route path="/settings"       element={<NonBossRoute element={<Settings />} />} />
+              <Route path="/db-manage"      element={<NonBossRoute element={<DbManage />} />} />
             </Route>
           </Route>
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Pencil, Trash2, Globe, Database, User, Link as LinkIcon } from 'lucide-react';
+import { Plus, Pencil, Trash2, Globe, Database, User, Link as LinkIcon, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
@@ -7,9 +7,15 @@ import Modal from '../components/ui/Modal';
 import Input from '../components/ui/Input';
 import { TableSkeleton } from '../components/ui/Skeleton';
 import websiteService from '../services/websiteService';
+import adminService from '../services/adminService';
 import { extractError } from '../utils/helpers';
 
 const DbManage = () => {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const isBoss = user.role === 'BOSS';
+
+  const [admins, setAdmins] = useState([]);
+  const [selectedAdminId, setSelectedAdminId] = useState(user.adminId || '');
   const [websites, setWebsites] = useState([]);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -20,12 +26,24 @@ const DbManage = () => {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ name: '', domain: '' });
 
+  // Fetch admin list if BOSS
+  useEffect(() => {
+    if (!isBoss) return;
+    adminService.getAll().then(({ data }) => {
+      setAdmins(data.data || []);
+      if (data.data?.length && !selectedAdminId) {
+        setSelectedAdminId(data.data[0].id);
+      }
+    }).catch(() => {});
+  }, []);
+
   const fetchData = useCallback(async () => {
+    if (!selectedAdminId) return;
     setLoading(true);
     try {
       const [webRes, profileRes] = await Promise.all([
-        websiteService.getAll(),
-        websiteService.getProfile(),
+        websiteService.getAll(selectedAdminId),
+        websiteService.getProfile(selectedAdminId),
       ]);
       setWebsites(webRes.data.data || []);
       const p = profileRes.data.data;
@@ -36,7 +54,7 @@ const DbManage = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedAdminId]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -47,7 +65,7 @@ const DbManage = () => {
     }
     setSavingDomain(true);
     try {
-      const { data } = await websiteService.updateDomain(clientDomain.trim());
+      const { data } = await websiteService.updateDomain(clientDomain.trim(), selectedAdminId);
       setProfile(data.data);
       toast.success('Domain updated');
     } catch (err) {
@@ -80,7 +98,7 @@ const DbManage = () => {
         await websiteService.update(editing.id, form);
         toast.success('Website updated');
       } else {
-        await websiteService.create(form);
+        await websiteService.create(form, selectedAdminId);
         toast.success('Website created');
       }
       setModalOpen(false);
@@ -108,51 +126,72 @@ const DbManage = () => {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">DB Manage</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage websites under your database connection</p>
+          <p className="text-sm text-gray-500 mt-1">Manage websites and database connections</p>
         </div>
         <Button icon={Plus} onClick={openCreate}>Add Website</Button>
       </div>
 
+      {/* Admin Selector (BOSS only) */}
+      {isBoss && (
+        <div className="card p-4 mb-6">
+          <label className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2 block">
+            Select Admin
+          </label>
+          <select
+            className="input-field w-full"
+            value={selectedAdminId}
+            onChange={(e) => setSelectedAdminId(Number(e.target.value))}
+          >
+            <option value="">-- Select Admin --</option>
+            {admins.map((a) => (
+              <option key={a.id} value={a.id}>{a.name} {a.surname} ({a.email})</option>
+            ))}
+          </select>
+        </div>
+      )}
+
       {/* Admin Profile Card */}
-      <div className="card p-5 mb-6">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-xl flex items-center justify-center shrink-0">
-            <User className="w-6 h-6 text-primary-600" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">
-              {profile?.name} {profile?.surname}
-            </h2>
-            <p className="text-sm text-gray-500">{profile?.email}</p>
-            <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs font-medium text-gray-500 mb-1">Database URL</p>
-                <code className="text-xs text-gray-600 dark:text-gray-400 break-all bg-gray-50 dark:bg-gray-800/50 block px-3 py-2 rounded">
-                  {profile?.dbUrl || 'Not configured'}
-                </code>
-              </div>
-              <div>
-                <label className="text-xs font-medium text-gray-500 mb-1 block">Client Domain</label>
-                <div className="flex gap-2">
-                  <input
-                    className="input-field flex-1"
-                    value={clientDomain}
-                    onChange={(e) => setClientDomain(e.target.value)}
-                    placeholder="example.com"
-                  />
-                  <button
-                    onClick={handleSaveDomain}
-                    disabled={savingDomain}
-                    className="px-3 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 text-sm font-medium whitespace-nowrap transition-colors"
-                  >
-                    {savingDomain ? '...' : 'Save'}
-                  </button>
+      {profile && (
+        <div className="card p-5 mb-6">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-xl flex items-center justify-center shrink-0">
+              <User className="w-6 h-6 text-primary-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                {profile.name} {profile.surname}
+              </h2>
+              <p className="text-sm text-gray-500">{profile.email}</p>
+              <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-medium text-gray-500 mb-1">Database URL</p>
+                  <code className="text-xs text-gray-600 dark:text-gray-400 break-all bg-gray-50 dark:bg-gray-800/50 block px-3 py-2 rounded">
+                    {profile.dbUrl || 'Not configured'}
+                  </code>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-500 mb-1 block">Client Domain</label>
+                  <div className="flex gap-2">
+                    <input
+                      className="input-field flex-1"
+                      value={clientDomain}
+                      onChange={(e) => setClientDomain(e.target.value)}
+                      placeholder="example.com"
+                    />
+                    <button
+                      onClick={handleSaveDomain}
+                      disabled={savingDomain}
+                      className="px-3 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 text-sm font-medium whitespace-nowrap transition-colors"
+                    >
+                      {savingDomain ? '...' : 'Save'}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Websites List */}
       <div className="mb-3 flex items-center justify-between">
@@ -163,10 +202,15 @@ const DbManage = () => {
 
       {loading ? (
         <TableSkeleton rows={5} cols={4} />
+      ) : !selectedAdminId ? (
+        <div className="card p-12 text-center">
+          <Database className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+          <p className="text-gray-500">Select an admin to manage websites.</p>
+        </div>
       ) : websites.length === 0 ? (
         <div className="card p-12 text-center">
           <Database className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500">No websites configured yet.</p>
+          <p className="text-gray-500">No websites configured for this admin.</p>
           <p className="text-sm text-gray-400 mt-1">Click "Add Website" to get started.</p>
         </div>
       ) : (
