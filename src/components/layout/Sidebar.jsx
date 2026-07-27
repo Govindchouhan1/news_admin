@@ -14,7 +14,6 @@ import {
   Layers,
   Database,
   Globe,
-  Shield,
 } from 'lucide-react';
 import useUiStore from '../../store/uiStore';
 import useAuthStore from '../../store/authStore';
@@ -43,7 +42,6 @@ const Sidebar = () => {
 
   const BOSS_NAV_ITEMS = [
     { to: '/dashboard', icon: LayoutDashboard, label: 'nav.dashboard' },
-    { to: '/admins', icon: Shield, label: 'Admins (प्रशासक)' },
     { to: '/users', icon: Users, label: 'nav.users' },
     { to: '/websites', icon: Globe, label: 'Websites (वेबसाइट्स)' },
     { to: '/db-manage', icon: Database, label: 'DB Manage' },
