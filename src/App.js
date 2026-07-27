@@ -22,6 +22,7 @@ const AdsManager     = lazy(() => import('./pages/AdsManager'));
 const SectionManager = lazy(() => import('./pages/SectionManager'));
 const DbManage       = lazy(() => import('./pages/DbManage'));
 const Websites       = lazy(() => import('./pages/Websites'));
+const Admins         = lazy(() => import('./pages/Admins'));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center h-64">
@@ -53,6 +54,8 @@ function App() {
               <Route path="/dashboard"       element={<Dashboard />} />
               <Route path="/users"           element={<Users />} />
               <Route path="/websites"        element={<Websites />} />
+              <Route path="/admins"          element={<Admins />} />
+              <Route path="/db-manage"       element={<DbManage />} />
 
               {/* Pages restricted for BOSS role */}
               <Route path="/analytics"       element={<NonBossRoute element={<Analytics />} />} />
@@ -65,7 +68,6 @@ function App() {
               <Route path="/ads"             element={<NonBossRoute element={<AdsManager />} />} />
               <Route path="/sections"        element={<NonBossRoute element={<SectionManager />} />} />
               <Route path="/settings"       element={<NonBossRoute element={<Settings />} />} />
-              <Route path="/db-manage"      element={<NonBossRoute element={<DbManage />} />} />
             </Route>
           </Route>
 

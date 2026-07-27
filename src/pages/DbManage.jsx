@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Pencil, Trash2, Globe, Database, User, Link as LinkIcon, Search } from 'lucide-react';
+import { Plus, Pencil, Trash2, Globe, Database, User, Link as LinkIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
@@ -31,11 +31,14 @@ const DbManage = () => {
     if (!isBoss) return;
     adminService.getAll().then(({ data }) => {
       setAdmins(data.data || []);
-      if (data.data?.length && !selectedAdminId) {
-        setSelectedAdminId(data.data[0].id);
-      }
     }).catch(() => {});
-  }, []);
+  }, [isBoss]);
+
+  // Auto-select first admin if none selected
+  useEffect(() => {
+    if (!isBoss || selectedAdminId || !admins.length) return;
+    setSelectedAdminId(admins[0].id);
+  }, [isBoss, selectedAdminId, admins]);
 
   const fetchData = useCallback(async () => {
     if (!selectedAdminId) return;
@@ -162,30 +165,22 @@ const DbManage = () => {
                 {profile.name} {profile.surname}
               </h2>
               <p className="text-sm text-gray-500">{profile.email}</p>
-              <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs font-medium text-gray-500 mb-1">Database URL</p>
-                  <code className="text-xs text-gray-600 dark:text-gray-400 break-all bg-gray-50 dark:bg-gray-800/50 block px-3 py-2 rounded">
-                    {profile.dbUrl || 'Not configured'}
-                  </code>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-gray-500 mb-1 block">Client Domain</label>
-                  <div className="flex gap-2">
-                    <input
-                      className="input-field flex-1"
-                      value={clientDomain}
-                      onChange={(e) => setClientDomain(e.target.value)}
-                      placeholder="example.com"
-                    />
-                    <button
-                      onClick={handleSaveDomain}
-                      disabled={savingDomain}
-                      className="px-3 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 text-sm font-medium whitespace-nowrap transition-colors"
-                    >
-                      {savingDomain ? '...' : 'Save'}
-                    </button>
-                  </div>
+              <div className="mt-3">
+                <label className="text-xs font-medium text-gray-500 mb-1 block">Client Domain</label>
+                <div className="flex gap-2">
+                  <input
+                    className="input-field flex-1"
+                    value={clientDomain}
+                    onChange={(e) => setClientDomain(e.target.value)}
+                    placeholder="example.com"
+                  />
+                  <button
+                    onClick={handleSaveDomain}
+                    disabled={savingDomain}
+                    className="px-3 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 text-sm font-medium whitespace-nowrap transition-colors"
+                  >
+                    {savingDomain ? '...' : 'Save'}
+                  </button>
                 </div>
               </div>
             </div>

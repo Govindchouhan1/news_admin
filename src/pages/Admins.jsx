@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Plus, Pencil, Trash2, Database, X, Check } from 'lucide-react';
+import { Plus, Pencil, Trash2, Database } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Button from '../components/ui/Button';
 import Table from '../components/ui/Table';
@@ -14,7 +13,6 @@ import adminService from '../services/adminService';
 import { extractError } from '../utils/helpers';
 
 const Admins = () => {
-  const { t } = useTranslation();
   const { user } = useAuthStore();
   const isBoss = user?.role === 'BOSS';
 

@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Globe, Plus, Pencil, Trash2, ExternalLink, ShieldCheck, Server, RefreshCw } from 'lucide-react';
+import { Globe, Plus, Pencil, Trash2, ExternalLink, ShieldCheck, Server, RefreshCw, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Button from '../components/ui/Button';
 import Table from '../components/ui/Table';
@@ -10,24 +10,31 @@ import Badge from '../components/ui/Badge';
 import Modal from '../components/ui/Modal';
 import Input from '../components/ui/Input';
 import websiteService from '../services/websiteService';
+import adminService from '../services/adminService';
 import { extractError } from '../utils/helpers';
 import useUiStore from '../store/uiStore';
+import useAuthStore from '../store/authStore';
 
 const schema = z.object({
-  name: z.string().min(2, 'Website name is required').max(100),
+  name: z.string().optional(),
   domain: z.string().min(3, 'Valid domain or URL required'),
-  layoutVersion: z.string().optional(),
 });
 
 const DEFAULT_SITES = [
-  { id: 1, name: 'Main News Portal (Client Part 1)', domain: 'http://localhost:3000', layoutVersion: 'Client V1 (Classic)', status: 'ACTIVE', isPrimary: true },
-  { id: 2, name: 'Modern Portal (Client Part 2)', domain: 'http://localhost:3001', layoutVersion: 'Client V2 (Modern Blue)', status: 'ACTIVE', isPrimary: false },
-  { id: 3, name: 'Amber Portal (Client Part 3)', domain: 'http://localhost:3002', layoutVersion: 'Client V3 (Warm Amber)', status: 'ACTIVE', isPrimary: false },
-  { id: 4, name: 'Emerald Portal (Client Part 4)', domain: 'http://localhost:3003', layoutVersion: 'Client V4 (Emerald Dark)', status: 'ACTIVE', isPrimary: false },
+  { id: 1, name: 'Main News Portal (Client Part 1)', domain: 'http://localhost:3000', status: 'ACTIVE', isPrimary: true },
+  { id: 2, name: 'Modern Portal (Client Part 2)', domain: 'http://localhost:3001', status: 'ACTIVE', isPrimary: false },
+  { id: 3, name: 'Amber Portal (Client Part 3)', domain: 'http://localhost:3002', status: 'ACTIVE', isPrimary: false },
+  { id: 4, name: 'Emerald Portal (Client Part 4)', domain: 'http://localhost:3003', status: 'ACTIVE', isPrimary: false },
 ];
 
 export const Websites = () => {
   const { openConfirm } = useUiStore();
+  const { user } = useAuthStore();
+  const isBoss = user?.role?.toUpperCase() === 'BOSS';
+
+  const [admins, setAdmins] = useState([]);
+  const [selectedAdminId, setSelectedAdminId] = useState(isBoss ? '' : (user?.adminId || ''));
+  const [profile, setProfile] = useState(null);
   const [websites, setWebsites] = useState(DEFAULT_SITES);
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -41,61 +48,84 @@ export const Websites = () => {
     formState: { errors },
   } = useForm({ resolver: zodResolver(schema) });
 
-  const fetchWebsites = async () => {
+  // Fetch admin list if BOSS
+  useEffect(() => {
+    if (!isBoss) return;
+    adminService.getAll().then(({ data }) => {
+      const list = data.data?.data || data.data || [];
+      setAdmins(list);
+    }).catch(() => {});
+  }, [isBoss]);
+
+  // Auto-select first admin once list loads
+  useEffect(() => {
+    if (!isBoss || selectedAdminId || !admins.length) return;
+    setSelectedAdminId(admins[0].id);
+  }, [isBoss, selectedAdminId, admins]);
+
+  const fetchWebsites = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await websiteService.getAll();
-      if (res.data?.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
-        setWebsites(res.data.data);
+      if (isBoss && !selectedAdminId) {
+        setWebsites([]);
+        setProfile(null);
+        setLoading(false);
+        return;
       }
+      const [webRes, profileRes] = await Promise.all([
+        websiteService.getAll(selectedAdminId),
+        websiteService.getProfile(selectedAdminId),
+      ]);
+      const data = webRes.data?.data;
+      if (Array.isArray(data) && data.length > 0) {
+        setWebsites(data);
+      } else {
+        setWebsites([]);
+      }
+      setProfile(profileRes.data?.data || null);
     } catch (err) {
-      // Fallback to default configured portals if backend table empty or not seeded
-      console.log('Using default portal layout sites:', err);
+      if (!isBoss) {
+        console.log('Using default portal layout sites:', err);
+      }
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedAdminId, isBoss]);
 
   useEffect(() => {
+    if (!selectedAdminId && isBoss) {
+      setWebsites([]);
+      setProfile(null);
+      return;
+    }
     fetchWebsites();
-  }, []);
+  }, [fetchWebsites, selectedAdminId, isBoss]);
 
   const openCreate = () => {
     setEditItem(null);
-    reset({ name: '', domain: '', layoutVersion: 'Client V1' });
+    reset({ name: '', domain: '' });
     setModalOpen(true);
   };
 
   const openEdit = (item) => {
     setEditItem(item);
-    reset({ name: item.name, domain: item.domain, layoutVersion: item.layoutVersion || 'Client V1' });
+    reset({ name: item.name, domain: item.domain });
     setModalOpen(true);
   };
 
   const onSubmit = async (data) => {
     setSaving(true);
     try {
+      const name = data.name || data.domain.replace(/^https?:\/\//, '').split('/')[0].split('?')[0];
       if (editItem) {
-        try {
-          await websiteService.update(editItem.id, data);
-        } catch (e) {
-          console.log('Local save fallback:', e);
-        }
-        setWebsites((prev) =>
-          prev.map((w) => (w.id === editItem.id ? { ...w, ...data } : w))
-        );
-        toast.success('Website updated successfully!');
+        await websiteService.update(editItem.id, { name, domain: data.domain });
+        toast.success('Website updated');
       } else {
-        const newItem = { id: Date.now(), ...data, status: 'ACTIVE', isPrimary: false };
-        try {
-          await websiteService.create(data);
-        } catch (e) {
-          console.log('Local add fallback:', e);
-        }
-        setWebsites((prev) => [...prev, newItem]);
-        toast.success('New Website added successfully!');
+        await websiteService.create({ name, domain: data.domain }, selectedAdminId);
+        toast.success('Website created');
       }
       setModalOpen(false);
+      fetchWebsites();
     } catch (err) {
       toast.error(extractError(err));
     } finally {
@@ -110,11 +140,11 @@ export const Websites = () => {
       onConfirm: async () => {
         try {
           await websiteService.remove(item.id);
-        } catch (e) {
-          console.log('Local delete fallback:', e);
+          toast.success('Website removed');
+          fetchWebsites();
+        } catch (err) {
+          toast.error(extractError(err));
         }
-        setWebsites((prev) => prev.filter((w) => w.id !== item.id));
-        toast.success('Website removed');
       },
     });
   };
@@ -137,7 +167,6 @@ export const Websites = () => {
                 </span>
               )}
             </p>
-            <p className="text-[10px] text-gray-400 font-mono">{row.layoutVersion || 'Default Layout'}</p>
           </div>
         </div>
       ),
@@ -147,7 +176,7 @@ export const Websites = () => {
       header: 'Domain URL',
       render: (val) => (
         <a
-          href={val.startsWith('http') ? val : `https://${val}`}
+          href={val?.startsWith('http') ? val : `https://${val}`}
           target="_blank"
           rel="noreferrer"
           className="text-xs text-primary-600 hover:underline flex items-center gap-1 font-mono"
@@ -211,11 +240,45 @@ export const Websites = () => {
           <Button variant="secondary" icon={RefreshCw} onClick={fetchWebsites} loading={loading} size="sm">
             Refresh
           </Button>
-          <Button icon={Plus} onClick={openCreate} size="sm">
-            Add Website
-          </Button>
+          {(!isBoss || selectedAdminId) && (
+            <Button icon={Plus} onClick={openCreate} size="sm">Add Website</Button>
+          )}
         </div>
       </div>
+
+      {/* Admin Selector (BOSS only) */}
+      {isBoss && (
+        <div className="card p-4">
+          <label className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2 block">
+            Select Admin
+          </label>
+          <select
+            className="input-field w-full"
+            value={selectedAdminId}
+            onChange={(e) => setSelectedAdminId(Number(e.target.value))}
+          >
+            <option value="">-- Select Admin --</option>
+            {admins.map((a) => (
+              <option key={a.id} value={a.id}>{a.name} {a.surname} ({a.email})</option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {/* Admin Profile Card */}
+      {profile && (
+        <div className="card p-4 flex items-center gap-3 border-l-4 border-l-primary-500">
+          <div className="w-10 h-10 bg-primary-100 dark:bg-primary-900/20 rounded-lg flex items-center justify-center shrink-0">
+            <User className="w-5 h-5 text-primary-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+              {profile.name} {profile.surname}
+            </p>
+            <p className="text-xs text-gray-500">{profile.email}</p>
+          </div>
+        </div>
+      )}
 
       {/* Quick Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -245,9 +308,16 @@ export const Websites = () => {
       </div>
 
       {/* Table */}
-      <div className="card overflow-hidden">
-        <Table columns={columns} data={websites} loading={loading} />
-      </div>
+      {isBoss && !selectedAdminId ? (
+        <div className="card p-12 text-center">
+          <Globe className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+          <p className="text-gray-500">Select an admin to manage websites.</p>
+        </div>
+      ) : (
+        <div className="card overflow-hidden">
+          <Table columns={columns} data={websites} loading={loading} />
+        </div>
+      )}
 
       {/* Create/Edit Modal */}
       <Modal
@@ -257,43 +327,13 @@ export const Websites = () => {
         size="md"
         footer={
           <>
-            <Button variant="secondary" onClick={() => setModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSubmit(onSubmit)} loading={saving}>
-              Save Website
-            </Button>
+            <Button variant="secondary" onClick={() => setModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleSubmit(onSubmit)} loading={saving}>Save Website</Button>
           </>
         }
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <Input
-            label="Website Name"
-            placeholder="e.g. Main News Portal V1"
-            error={errors.name && errors.name.message}
-            {...register('name')}
-            autoFocus
-          />
-
-          <Input
-            label="Domain / URL"
-            placeholder="https://example.com"
-            error={errors.domain && errors.domain.message}
-            {...register('domain')}
-          />
-
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">Layout Version</label>
-            <select
-              {...register('layoutVersion')}
-              className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-xs text-gray-900 dark:text-white outline-none"
-            >
-              <option value="Client V1 (Classic)">Client V1 (Classic Red Theme)</option>
-              <option value="Client V2 (Modern Blue)">Client V2 (Modern Blue Theme)</option>
-              <option value="Client V3 (Warm Amber)">Client V3 (Warm Amber Theme)</option>
-              <option value="Client V4 (Emerald Dark)">Client V4 (Emerald Dark Theme)</option>
-            </select>
-          </div>
+          <Input label="Domain / URL" placeholder="https://example.com" error={errors.domain && errors.domain.message} {...register('domain')} autoFocus />
         </form>
       </Modal>
     </div>
