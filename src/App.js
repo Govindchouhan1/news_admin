@@ -20,8 +20,6 @@ const Users      = lazy(() => import('./pages/Users'));
 const Settings   = lazy(() => import('./pages/Settings'));
 const AdsManager     = lazy(() => import('./pages/AdsManager'));
 const SectionManager = lazy(() => import('./pages/SectionManager'));
-const DbManage       = lazy(() => import('./pages/DbManage'));
-const Websites       = lazy(() => import('./pages/Websites'));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center h-64">
@@ -52,8 +50,6 @@ function App() {
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard"       element={<Dashboard />} />
               <Route path="/users"           element={<Users />} />
-              <Route path="/websites"        element={<Websites />} />
-              <Route path="/db-manage"       element={<DbManage />} />
 
               {/* Pages restricted for BOSS role */}
               <Route path="/analytics"       element={<NonBossRoute element={<Analytics />} />} />

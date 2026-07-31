@@ -9,9 +9,11 @@ import {
   Plus,
   Trash2,
   Tv,
-  Globe
+  Globe,
+  Loader2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import settingsService from '../services/settingsService';
 
 export default function SectionManager() {
   const [activeTab, setActiveTab] = useState('live_ticker');
@@ -27,6 +29,8 @@ export default function SectionManager() {
     ]
   });
   const [newTickerItem, setNewTickerItem] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Astrology Horoscope State
   const [astrology, setAstrology] = useState({
@@ -58,16 +62,26 @@ export default function SectionManager() {
   ]);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem('app_section_settings');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.liveBar) setLiveBar(parsed.liveBar);
-        if (parsed.astrology) setAstrology(parsed.astrology);
-      }
-    } catch (err) {
-      console.error("Error loading section settings:", err);
-    }
+    setIsLoading(true);
+    settingsService.get()
+      .then(({ data }) => {
+        const s = data.data || {};
+        if (s.liveBar) setLiveBar(s.liveBar);
+        if (s.astrology) setAstrology(s.astrology);
+      })
+      .catch((err) => {
+        console.error('Failed to load settings:', err);
+        // fallback to localStorage
+        try {
+          const saved = localStorage.getItem('app_section_settings');
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            if (parsed.liveBar) setLiveBar(parsed.liveBar);
+            if (parsed.astrology) setAstrology(parsed.astrology);
+          }
+        } catch (_) {}
+      })
+      .finally(() => setIsLoading(false));
   }, []);
 
   const handleAddTicker = () => {
@@ -88,13 +102,19 @@ export default function SectionManager() {
     toast.success('टिकर संदेश हटाया गया');
   };
 
-  const handleSaveSettings = () => {
+  const handleSaveSettings = async () => {
+    setIsSaving(true);
     try {
-      const settings = { liveBar, astrology, regionalStates };
-      localStorage.setItem('app_section_settings', JSON.stringify(settings));
+      const payload = { liveBar, astrology };
+      await settingsService.update(payload);
+      // also save to localStorage as cache
+      localStorage.setItem('app_section_settings', JSON.stringify(payload));
       toast.success('सभी सेक्शन अपडेट्स सफलतापूर्वक सुरक्षित किए गए!');
     } catch (err) {
+      console.error('Save failed:', err);
       toast.error('सेटिंग्स सुरक्षित करने में त्रुटि हुई');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -114,10 +134,11 @@ export default function SectionManager() {
 
         <button
           onClick={handleSaveSettings}
-          className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-red-600/30 transition-all active:scale-95 shrink-0"
+          disabled={isSaving}
+          className="flex items-center gap-2 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-red-600/30 transition-all active:scale-95 shrink-0"
         >
-          <Save className="w-4 h-4" />
-          <span>सुरक्षित करें (Save Changes)</span>
+          {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+          <span>{isSaving ? 'सुरक्षित हो रहा है...' : 'सुरक्षित करें (Save Changes)'}</span>
         </button>
       </div>
 
