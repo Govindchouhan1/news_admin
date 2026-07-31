@@ -2,7 +2,7 @@ import axios from 'axios';
 import { getAccessToken, setAccessToken } from '../store/authStore';
 import useAuthStore from '../store/authStore';
 
-const BASE_URL = process.env.REACT_APP_API_URL || 'https://api.news-portal.uz/api/v1';
+const BASE_URL = process.env.REACT_APP_API_URL || 'https://news-back-z95k.onrender.com/api/v1';
 
 const api = axios.create({
   baseURL: BASE_URL,
