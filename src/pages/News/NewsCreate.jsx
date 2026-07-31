@@ -31,11 +31,18 @@ const NewsCreate = () => {
   const handleSubmit = async (data) => {
     setLoading(true);
     try {
+      console.log('📤 Submitting news data:', data);
+      console.log('🔑 Access token:', sessionStorage.getItem('accessToken'));
+      console.log('🔄 Refresh token:', localStorage.getItem('refreshToken'));
       const res = await newsService.create(data);
+      console.log('✅ News created:', res.data);
       const newId = res.data.data?.id;
       toast.success(t('news.createSuccess'));
-      setCreatedId(newId); // rasm qadamiga o'tish
+      setCreatedId(newId);
     } catch (err) {
+      console.error('❌ Error creating news:', err);
+      console.error('❌ Error response:', err?.response?.data);
+      console.error('❌ Status:', err?.response?.status);
       toast.error(extractError(err));
     } finally {
       setLoading(false);

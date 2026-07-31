@@ -20,6 +20,7 @@ const schema = z.object({
   rank: z.coerce.number().int().min(0).max(10),
   slug: z.string().optional(),
   customUrl: z.string().optional(),
+  videoUrl: z.string().optional(),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
   metaKeywords: z.string().optional(),
@@ -48,6 +49,7 @@ const NewsForm = ({ defaultValues, categories, onSubmit: onSubmitProp, loading, 
       rank: defaultValues?.rank ?? 0,
       slug: defaultValues?.slug || '',
       customUrl: defaultValues?.customUrl || '',
+      videoUrl: defaultValues?.videoUrl || '',
       metaTitle: defaultValues?.metaTitle || '',
       metaDescription: defaultValues?.metaDescription || '',
       metaKeywords: defaultValues?.metaKeywords || '',
@@ -135,26 +137,32 @@ const NewsForm = ({ defaultValues, categories, onSubmit: onSubmitProp, loading, 
                 placeholder="https://example.com/custom-news-link"
                 {...register('customUrl')}
               />
+
+              <Input
+                label="YouTube / Video URL"
+                placeholder="https://www.youtube.com/watch?v=..."
+                {...register('videoUrl')}
+              />
+
+              <Input
+                label="SEO Meta Title"
+                placeholder="Optimized search headline"
+                {...register('metaTitle')}
+              />
+
+              <Textarea
+                label="SEO Meta Description"
+                placeholder="High CTR search summary description"
+                rows={2}
+                {...register('metaDescription')}
+              />
+
+              <Input
+                label="SEO Meta Keywords"
+                placeholder="e.g. breaking news, india, politics, election 2026"
+                {...register('metaKeywords')}
+              />
             </div>
-
-            <Input
-              label="SEO Meta Title"
-              placeholder="Catchy search engine title (defaults to News Title)"
-              {...register('metaTitle')}
-            />
-
-            <Textarea
-              label="SEO Meta Description"
-              placeholder="High CTR search summary description"
-              rows={2}
-              {...register('metaDescription')}
-            />
-
-            <Input
-              label="SEO Meta Keywords"
-              placeholder="e.g. breaking news, india, politics, election 2026"
-              {...register('metaKeywords')}
-            />
           </div>
         </div>
 

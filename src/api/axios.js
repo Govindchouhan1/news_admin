@@ -51,8 +51,9 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const authRequest = originalRequest?.url?.includes('/auth');
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && !originalRequest._retry && !authRequest) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -70,7 +71,6 @@ api.interceptors.response.use(
       const refreshToken = localStorage.getItem('refreshToken');
       if (!refreshToken) {
         isRefreshing = false;
-        // Redirect to login
         window.location.href = '/login';
         return Promise.reject(error);
       }
@@ -84,7 +84,6 @@ api.interceptors.response.use(
         setAccessToken(accessToken);
         localStorage.setItem('refreshToken', newRefreshToken);
 
-        // Update auth store user if needed
         try {
           const { default: useAuthStore } = await import('../store/authStore');
           useAuthStore.getState().updateTokens(accessToken, newRefreshToken, user);
