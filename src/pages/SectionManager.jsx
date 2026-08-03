@@ -118,6 +118,17 @@ export default function SectionManager() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+        <Loader2 className="w-8 h-8 animate-spin text-red-600 mb-2" />
+        <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold animate-pulse">
+          सेटिंग्स लोड हो रही हैं...
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}

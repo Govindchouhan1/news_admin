@@ -18,7 +18,6 @@ const Hashtags   = lazy(() => import('./pages/Hashtags'));
 const Comments   = lazy(() => import('./pages/Comments'));
 const Users      = lazy(() => import('./pages/Users'));
 const Settings   = lazy(() => import('./pages/Settings'));
-const AdsManager     = lazy(() => import('./pages/AdsManager'));
 const SectionManager = lazy(() => import('./pages/SectionManager'));
 
 const PageLoader = () => (
@@ -59,7 +58,6 @@ function App() {
               <Route path="/categories"      element={<NonBossRoute element={<Categories />} />} />
               <Route path="/hashtags"        element={<NonBossRoute element={<Hashtags />} />} />
               <Route path="/comments"        element={<NonBossRoute element={<Comments />} />} />
-              <Route path="/ads"             element={<NonBossRoute element={<AdsManager />} />} />
               <Route path="/sections"        element={<NonBossRoute element={<SectionManager />} />} />
               <Route path="/settings"       element={<NonBossRoute element={<Settings />} />} />
             </Route>

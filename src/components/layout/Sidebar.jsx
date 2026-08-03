@@ -32,7 +32,6 @@ const Sidebar = () => {
     { to: '/hashtags', icon: Hash, label: 'nav.hashtags' },
     { to: '/comments', icon: MessageSquare, label: 'nav.comments' },
     { to: '/users', icon: Users, label: 'nav.users' },
-    { to: '/ads', icon: Zap, label: 'Ads Manager' },
     { to: '/settings', icon: Settings2, label: 'nav.settings' },
   ];
 
